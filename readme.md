@@ -41,3 +41,4 @@
     Thumbs.db
     ```
 3. pojo(数据库)——bo(business object)——vo(view object)
+4. 数据库设计
