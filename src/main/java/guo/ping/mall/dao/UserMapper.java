@@ -24,11 +24,11 @@ public interface UserMapper {
 
     String selectQuestionByUsername(String username);
 
-    int checkAnswer(@Param("username")String username, @Param("question")String question, @Param("answer")String answer);
+    int checkAnswer(@Param("username") String username, @Param("question") String question, @Param("answer") String answer);
 
-    int updatePasswordByUsername(String username, String passwordNew);
+    int updatePasswordByUsername(@Param("username") String username, @Param("passwordNew") String passwordNew);
 
-    int checkPassword(@Param("password") String password, @Param("userId")Integer id);
+    int checkPassword(@Param("password") String password, @Param("userId") Integer id);
 
-    int checkEmailByUserId(String email, Integer userId);
+    int checkEmailByUserId(@Param("email") String email, @Param("userId") Integer userId);
 }
