@@ -20,7 +20,7 @@ import javax.servlet.http.HttpSession;
  */
 @Controller
 @RequestMapping("/manager/category")
-public class CategoryManagerController {
+public class CategoryManageController {
 
     @Autowired
     private IUserService iUserService;
