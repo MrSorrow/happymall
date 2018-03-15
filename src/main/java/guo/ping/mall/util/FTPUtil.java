@@ -24,16 +24,22 @@ public class FTPUtil {
         this.pwd = pwd;
     }
 
+    /**
+     * 批量上传文件
+     * @param fileList
+     * @return
+     * @throws IOException
+     */
     public static boolean uploadFile(List<File> fileList) throws IOException {
         FTPUtil ftpUtil = new FTPUtil(ftpIp, 21, ftpUser, ftpPassword);
         logger.info("开始连接ftp服务器");
-        boolean result = ftpUtil.uploadFile("img", fileList);
+        boolean result = ftpUtil.uploadFile("mmall_img", fileList);
         logger.info("开始关闭连接ftp服务器，结束上传，上传结果：{}", result);
         return result;
     }
 
     private boolean uploadFile(String remotePath, List<File> fileList) throws IOException {
-        boolean uploaded = true;
+        boolean uploaded = false;
         FileInputStream fis = null;
         if(connectServer(this.getIp(), this.getPort(), this.getUser(), this.getPwd())){
             try {
@@ -46,9 +52,9 @@ public class FTPUtil {
                     fis = new FileInputStream(file);
                     ftpClient.storeFile(file.getName(), fis);
                 }
+                uploaded = true;
             } catch (IOException e) {
                 logger.error("上传文件异常", e);
-                uploaded = false;
             } finally {
                 ftpClient.disconnect();
                 fis.close();
@@ -63,6 +69,7 @@ public class FTPUtil {
         try {
             ftpClient.connect(ip);
             isSuccess = ftpClient.login(user, pwd);
+            logger.info("FTP服务器连接成功");
         } catch (IOException e) {
             logger.error("FTP服务器连接异常", e);
         }
