@@ -1,5 +1,8 @@
 package guo.ping.mall.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import guo.ping.mall.common.ResonseCode;
 import guo.ping.mall.common.ServerResponse;
 import guo.ping.mall.dao.CategoryMapper;
@@ -10,15 +13,18 @@ import guo.ping.mall.service.IProductService;
 import guo.ping.mall.util.DateTimeUtil;
 import guo.ping.mall.util.PropertiesUtil;
 import guo.ping.mall.vo.ProductDetailVo;
+import guo.ping.mall.vo.ProductListVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author Kingdompin@163.com
  * @date 2018/3/3 下午12:45
  */
-@Service
+@Service("iProductService")
 public class ProductServiceImpl implements IProductService {
 
     @Autowired
@@ -78,7 +84,38 @@ public class ProductServiceImpl implements IProductService {
             return ServerResponse.createByErrorMessage("产品已下架或者删除！");
         }
         ProductDetailVo productDetailVo = assembleProductDetailVo(product);
-        return ServerResponse.createBySuccess(productDetailVo );
+        return ServerResponse.createBySuccess(productDetailVo);
+    }
+
+    @Override
+    public ServerResponse<PageInfo> getProductList(int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<Product> productList = productMapper.selectList();
+        List<ProductListVo> productListVos = Lists.newArrayList();
+        for (Product product : productList) {
+            ProductListVo productListVo = assembleProductListVo(product);
+            productListVos.add(productListVo);
+        }
+        PageInfo pageResult = new PageInfo(productList);
+        pageResult.setList(productListVos);
+        return ServerResponse.createBySuccess(pageResult);
+    }
+
+    @Override
+    public ServerResponse<PageInfo> searchProduct(String productName, Integer productId, int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        if(StringUtils.isNoneBlank(productName)){
+            productName = new StringBuilder().append("%").append(productName).append("%").toString();
+        }
+        List<Product> productList = productMapper.selectByNameAndProductId(productName, productId);
+        List<ProductListVo> productListVos = Lists.newArrayList();
+        for (Product product : productList) {
+            ProductListVo productListVo = assembleProductListVo(product);
+            productListVos.add(productListVo);
+        }
+        PageInfo pageResult = new PageInfo(productList);
+        pageResult.setList(productListVos);
+        return ServerResponse.createBySuccess(pageResult);
     }
 
     private ProductDetailVo assembleProductDetailVo(Product product) {
@@ -97,15 +134,29 @@ public class ProductServiceImpl implements IProductService {
         productDetailVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix", "http://img.happymmall.com/"));
 
         Category category = categoryMapper.selectByPrimaryKey(product.getCategoryId());
-        if(category == null){
+        if (category == null) {
             productDetailVo.setParentCategoryId(0);
         } else {
             productDetailVo.setParentCategoryId(category.getParentId());
         }
 
         productDetailVo.setCreateTime(DateTimeUtil.dateToStr(product.getCreateTime()));
-        productDetailVo.setUpdateTime(DateTimeUtil.dateToStr(product.getUpdateTime() ));
+        productDetailVo.setUpdateTime(DateTimeUtil.dateToStr(product.getUpdateTime()));
 
         return productDetailVo;
+    }
+
+    private ProductListVo assembleProductListVo(Product product) {
+        ProductListVo productListVo = new ProductListVo();
+        productListVo.setId(product.getId());
+        productListVo.setSubtitle(product.getSubtitle());
+        productListVo.setPrice(product.getPrice());
+        productListVo.setMainImage(product.getMainImage());
+        productListVo.setCategoryId(product.getCategoryId());
+        productListVo.setName(product.getName());
+        productListVo.setStatus(product.getStatus());
+        productListVo.setImageHost(PropertiesUtil.getProperty("ftp.server.http.prefix", "http://img.happymmall.com/"));
+
+        return productListVo;
     }
 }
